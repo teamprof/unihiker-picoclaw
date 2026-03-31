@@ -1,5 +1,4 @@
-# Title
-AI agent running on UNIHIKER M10
+# AI agent running on UNIHIKER M10
 
 # Introduction 
 Running an AI agent on a single-board computer (SBC) offers significant advantages over a traditional PC. SBCs are compact, energy-efficient, and cost-effective, making them ideal for edge deployments where space and power are limited. With GPIO and hardware interfaces, SBCs integrate seamlessly into IoT ecosystems, allowing direct control of sensors and actuators. 
