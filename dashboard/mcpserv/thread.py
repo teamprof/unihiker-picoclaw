@@ -16,9 +16,41 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+import os
+import threading
 
-PATH_PICOCLAW = "/root/picoclaw/picoclaw"
+# import time
+import logging
+from circuits import Component, Event, Worker
 
-# define MCP_PORT automatically enable MCP, undefine it to disable MCP
-# This value MUST match the port number specified in ~/.picoclaw/config.json
-# MCP_PORT = 5005
+
+import config
+from .lamp_server import LampServer
+from common.pyprof import PyProf
+
+
+class task(Event):
+    """task"""
+
+    pass
+
+
+class McpThread(Component):
+    def __init__(self):
+        super().__init__()
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug(
+            f"{self.name} init: pid={os.getpid()}, thread={threading.current_thread().name}"
+        )
+        self.thread = Worker().register(self)
+
+    def started(self, *args):
+        self.logger.debug(
+            f"{self.name} started: pid={os.getpid()}, thread={threading.current_thread().name}"
+        )
+
+        if hasattr(config, "MCP_PORT"):
+            self.logger.debug(f"{self.name} started: spawning thread for LampServer")
+            # time.sleep(2)
+            server = LampServer.getInstance()
+            self.fire(task(server.run), self.thread)

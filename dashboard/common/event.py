@@ -59,6 +59,7 @@ class AppEvent(Event):
         ServicesGatewayInfo = auto()  # arg1 = gateway ip and port in format "ip:port"
         ChannelsInfo = auto()  # arg1 = channel in string format e.g. "telegram"
         RefreshStateInfo = auto()
+        McpReady = auto()
         Shutdown = auto()
 
     # class TimerSrc(Enum):

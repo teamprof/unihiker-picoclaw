@@ -16,9 +16,39 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+import signal
+import logging
+from circuits import Manager
 
-PATH_PICOCLAW = "/root/picoclaw/picoclaw"
+from version import VERSION
+from context import Context
+from app.app import App
+from agent.agent import Agent
 
-# define MCP_PORT automatically enable MCP, undefine it to disable MCP
-# This value MUST match the port number specified in ~/.picoclaw/config.json
-# MCP_PORT = 5005
+###############################################################################
+log_level = logging.DEBUG  # log_level = logging.INFO
+logging.basicConfig(
+    level=log_level,
+    format="%(levelname)s: %(message)s",
+)
+# logging.basicConfig(level=log_level, format="%(asctime)-15s %(name)-8s %(levelname)s: %(message)s",)
+logger = logging.getLogger(__name__)
+
+
+if __name__ == "__main__":
+    logger.debug(f"start dashboard version {VERSION}")
+    context = Context(app=App.channel, agent=Agent.channel)
+
+    mgr = Manager()
+    mgr += App(context).register(mgr)
+    mgr += Agent(context).register(mgr)
+
+    try:
+        mgr.run()
+    except KeyboardInterrupt:
+        logger.debug(f"KeyboardInterrupt")
+    except Exception as e:
+        logger.debug(f"Error: {e}")
+    finally:
+        mgr.stop()
+        logger.debug(f"exit")

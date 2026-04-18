@@ -16,14 +16,19 @@
 # HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-import signal
+import os
+import threading
+
+# import signal
 import logging
-from circuits import Manager
+from circuits import Component, Event, Manager, Worker
 
 from version import VERSION
 from context import Context
 from app.app import App
 from agent.agent import Agent
+from mcpserv.thread import McpThread
+from common.pyprof import PyProf
 
 ###############################################################################
 log_level = logging.DEBUG  # log_level = logging.INFO
@@ -35,13 +40,42 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class DashboardThread(Component):
+    def __init__(self):
+        super().__init__()
+        self.logger = logging.getLogger(__name__)
+        self.logger.debug(
+            f"{self.name} init: pid={os.getpid()}, thread={threading.current_thread().name}"
+        )
+
+        context = Context(app=App.channel, agent=Agent.channel)
+        self.app = App(context).register(self)
+        self.agent = Agent(context).register(self)
+
+    def started(self, *args):
+        self.logger.debug(
+            f"{self.name} started: pid={os.getpid()}, thread={threading.current_thread().name}"
+        )
+
+    def task_success(self, *args, **kwargs):
+        # The worker usually fires 'task_success' when finished
+        args and logger.debug(f"task_success {args[0]}")
+        # if args:
+        #     print(args[0])
+
+
 if __name__ == "__main__":
+    logger.debug(
+        f"================================================================================"
+    )
     logger.debug(f"start dashboard version {VERSION}")
-    context = Context(app=App.channel, agent=Agent.channel)
+    logger.debug(
+        f"================================================================================"
+    )
 
     mgr = Manager()
-    mgr += App(context).register(mgr)
-    mgr += Agent(context).register(mgr)
+    dashboard = DashboardThread().register(mgr)
+    mcp = McpThread().register(mgr)
 
     try:
         mgr.run()

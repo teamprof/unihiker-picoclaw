@@ -1,12 +1,43 @@
-# Dashboard of running PicoClaw on UNIHIKER M10
+# Transforming UNIHIKER M10 into an AIoT Device with PicoClaw 
 
 ## Introduction 
-This project leverages the UNIHIKER GUI library to implement a graphical dashboard for PicoClaw, running on the UNIHIKER M10 SBC.
-Before starting, **ensure that PicoClaw is properly set up text** and running on the UNIHIKER M10. For detailed instructions, please refer to [Running PicoClaw on UNIHIKER M10](https://community.dfrobot.com/makelog-318617.html)
+This project add MCP feature to the graphical dashboard for PicoClaw, running on the UNIHIKER M10 SBC.  
+Before starting, **ensure that dashboard for PicoClaw is properly set up and running on the UNIHIKER M10**. For detailed instructions, please refer to [Dashboard of running PicoClaw on UNIHIKER M10](https://community.dfrobot.com/makelog-318618.html)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL_v3-blue.svg)](https://github.com/teamprof/pico-audio-ml/blob/main/LICENSE)  
 <a href="https://www.buymeacoffee.com/teamprof" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 38px !important;width: 128px !important;" ></a>
 
+
+## pin assignment
+| pin | assignment   |
+|-----|--------------|
+| P8  | Yellow light |
+| P9  | Green light  |
+| P16 | Red light    |
+
+
+## PicoClaw setup
+- Refer to [Running PicoClaw on UNIHIKER M10](https://community.dfrobot.com/makelog-318617.html) to ensure PicoClaw is operating correctly.
+- edit ~/.picoclaw/config.json, add MCP settings with port 5005 (This value MUST match "MCP_PORT" specified in config.py)
+```
+    "mcp": {
+        "enabled": true,
+        "servers": {
+            "lamp": {
+                "enabled": true,
+                "url": "http://127.0.0.1:5005/mcp",
+                "protocol": "http"
+            }
+        },
+        "discovery": {
+            "enabled": true,
+            "ttl": 5,
+            "max_search_results": 5,
+            "use_bm25": true,
+            "use_regex": false
+        }
+    },
+```
 
 ## Software setup
 Run the following commands to clone the project repository and install the required libraries.
@@ -16,35 +47,35 @@ cd unihiker-picoclaw/dashboard
 pip install -r requirements.txt
 ```
 
-## Run dashboard app
+
+## Run app
 - Ensure that the PicoClaw binary file is located at "/root/picoclaw/picoclaw", or update "config.py" to set the correct path
+- **Define "MCP_PORT"** and ensure that "MCP_PORT" in config.py matches the servers-lamp port number specified in ~/.picoclaw/config.json
 ```
-PATH_PICOCLAW = "/root/picoclaw/picoclaw"
+    PATH_PICOCLAW = "/root/picoclaw/picoclaw"
+
+    MCP_PORT = 5005
 ```
 - Launch the dashboard by executing the following command.
 ```
-python main.py
+    python main.py
 ```
 If everything goes smoothly, you should see the following screen.  
+**Notice that startup time takes around 1 minute.**  
 [![screen-start](./assets/screen-start.png)](https://github.com/teamprof/unihiker-picoclaw/blob/main/assets/screen-start.png)  
 PicoClaw is now successfully running on your UNIHIKER M10.
 
-
-### Stop PicoClaw
-Stop PicoClaw by click the stop icon [![icon-stop](./dashboard/assets/stop.png)](https://github.com/teamprof/unihiker-picoclaw/blob/main/dashboard/assets/stop.png)
-or press the Button A  
-The following screen shows PicoClaw is stopped.   
-[![screen-stop](./assets/screen-stop.png)](https://github.com/teamprof/unihiker-picoclaw/blob/main/assets/screen-stop.png)
-
-
-### Start PicoClaw
-Start PicoClaw by click the start icon [![icon-start](./dashboard/assets/start.png)](https://github.com/teamprof/unihiker-picoclaw/blob/main/dashboard/assets/start.png)
-or press the Button A 
-
 ### Test 
-- Send the message "what is your name" on Telegram.
-- Step 2: Wait to receive the response.  
-[![picoclaw-tg](./assets/picoclaw-tg.jpg)](https://github.com/teamprof/unihiker-picoclaw/blob/main/assets/picoclaw-tg.jpg)  
+- Send the message "turn the red lamp on" on Telegram.
+- Wait to receive the response.  
+[![tg-red-on](./assets/tg-red-on.png)](https://github.com/teamprof/unihiker-picoclaw/blob/main/assets/tg-red-on.png)  
+
+- Send the message "make the yellow lamp brightere" on Telegram.
+- Wait to receive the response.  
+
+- Send the message "turn off the red lamp" on Telegram.
+- Wait to receive the response.  
+[![tg-yellow-brighter](./assets/tg-yellow-brighter.png)](https://github.com/teamprof/unihiker-picoclaw/blob/main/assets/tg-yellow-brighter.png)  
 
 
 ### Exit dashboard app
@@ -52,10 +83,10 @@ click the exit icon
 [![icon-exit](./dashboard/assets/exit.png)](https://github.com/teamprof/unihiker-picoclaw/blob/main/dashboard/assets/exit.png)
 or press the Button B to exit the dashboard
 
-### Video demo
-Video demo is available on [video demo](https://youtube.com/shorts/2kDmuJmmUu4)  
-[![video](./assets/video.jpg)](https://youtube.com/shorts/2kDmuJmmUu4)  
-
+## Video demo
+Video demo is available on [video demo](https://youtube.com/shorts/qJeA8fxbpYs)  
+**Notice that startup time takes around 1 minute.**   
+[![video](./assets/video-aiot.jpg)](https://youtube.com/shorts/qJeA8fxbpYs)  
 
 
 ## License

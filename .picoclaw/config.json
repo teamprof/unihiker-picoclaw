@@ -446,7 +446,14 @@
             "interval_minutes": 5
         },
         "mcp": {
-            "enabled": false,
+            "enabled": true,
+            "servers": {
+                "lamp": {
+                    "enabled": true,
+                    "url": "http://127.0.0.1:5005/mcp",
+                    "protocol": "http"
+                }
+            },
             "discovery": {
                 "enabled": true,
                 "ttl": 5,

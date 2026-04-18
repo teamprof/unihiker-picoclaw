@@ -17,10 +17,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import os
+import threading
 import logging
 from circuits import handler, Event, Timer
 from circuits.core.events import started
 
+import config
 from common.pyprof import PyProf
 from common.event import AppEvent
 from gui.splash import GuiSplash
@@ -57,6 +59,7 @@ class App(PyProf):
             AppEvent.SystemSrc.ServicesCronInfo: self.handleGatewayState,
             AppEvent.SystemSrc.ServicesHeartbeatInfo: self.handleGatewayState,
             AppEvent.SystemSrc.ServicesGatewayInfo: self.handleGatewayState,
+            AppEvent.SystemSrc.McpReady: self.handleMcpReady,
             AppEvent.SystemSrc.Shutdown: self.handleShutdown,
         }
         self.switchUser = {
@@ -70,7 +73,10 @@ class App(PyProf):
         Timer(1, timer1HzEvent(), persist=True).register(self)
 
     def started(self, *args):
-        self.logger.debug(f"{self.name} started: pid={os.getpid()}")
+        self.logger.debug(
+            f"{self.name} started: pid={os.getpid()}, thread={threading.current_thread().name}"
+        )
+        # self.logger.debug(f"{self.name} started: pid={os.getpid()}")
         # self.fire(started(*args), self.gui)
 
     def ready(self, *args):
@@ -154,6 +160,10 @@ class App(PyProf):
         self.logger.debug(
             f"{self.name}: handleSplashShow: event={event.event}, arg0={event.arg0}, arg1={event.arg1}, obj={event.obj}"
         )
+
+        if hasattr(config, "MCP_PORT"):
+            return
+
         dst = self.context.agent
         dst and self.postEvent(
             AppEvent.Value.System, AppEvent.SystemSrc.StartAgent, dest=dst
@@ -180,3 +190,9 @@ class App(PyProf):
                 AppEvent.Value.System, AppEvent.SystemSrc.RefreshStateInfo, dest=dst
             )
             self.refreshState = False
+
+    def handleMcpReady(self, event):
+        dst = self.context.agent
+        dst and self.postEvent(
+            AppEvent.Value.System, AppEvent.SystemSrc.StartAgent, dest=dst
+        )
